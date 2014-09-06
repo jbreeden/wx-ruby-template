@@ -38,3 +38,9 @@ Usage
 - Update the rakefile to point to the correct library & header locations for the prerqeuisites mentioned above.
 - Run `rake debug:build`, `rake release:build`, or `rake dist:build` to compile the bare template
 - Run the generated program, and a blank wxFrame should appear
+
+Platform Support
+================
+
+So far I've only used this project template on Windows 8. Though, all the libraries involved are cross-platform so
+porting should be relatively straightforward.
