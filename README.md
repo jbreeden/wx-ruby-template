@@ -26,7 +26,7 @@ Prerequisites
 
 - Prebuilt wxWidgets libraries
 - Prebuilt ruby runtime
-- Prebuilt (rubydo)[https://github.com/jbreeden/rubydo]
+- Prebuilt [rubydo](https://github.com/jbreeden/rubydo)
   * Allows the use of C++ lambdas when obtaining/releasing the ruby GVL & launching ruby-aware threads
   
 You'll likely want to compile these from source with your preferred C++ compiler so the binaries will be compatible.
