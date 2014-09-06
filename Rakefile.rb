@@ -210,3 +210,12 @@ namespace :dist do
     end
   end
 end
+
+# Clean task
+# ==========
+
+task :clean do
+  rm_rf "Debug" if File.exists? "Debug"
+  rm_rf "Release" if File.exists? "Release"
+  rm_rf "Dist" if File.exists? "Dist"
+end
