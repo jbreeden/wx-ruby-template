@@ -28,16 +28,16 @@ public:
 int main(int argc, char** argv) {
   ruby::init(argc, argv);
 
-  ruby::without_gvl(std::shared_ptr<function<void()>>(new function<void()>([&](){
+  ruby::without_gvl(DO [&](){
     wxApp::SetInstance(new App);
     wxEntryStart(argc, argv);
     wxTheApp->OnInit();
     wxTheApp->OnRun();
     wxTheApp->OnExit();
     wxEntryCleanup();
-  })), std::shared_ptr<function<void()>>(new function<void()>([&](){
+  } END, DO [&](){
     cerr << "UBF callback hit (ruby execution has completed)" << endl;
-  })));
+  } END);
 
   return 0;
 }

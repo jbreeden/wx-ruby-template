@@ -185,13 +185,28 @@ namespace :release do
     sh "#{$CPP} #{link_options} #{obj_files.join(' ')} #{link_libraries} -o Release/#{$ARTIFACT}"
   end
   
-  desc "Strip all unneeded binary symbols"
-  task :strip do
-    Dir["Release/**/*.{o,exe,dll,so}"].each do |binary|
+  desc "Build the Release configuration"
+  task :build => ["compile", "link", "Release/app.xrc", "Release/msvcrt-ruby210.dll", "Release/lib/ruby"]
+end
+
+# Dist Configuration Tasks
+# ========================
+
+namespace :dist do
+ 
+  directory "Dist"
+  task :build => ["release:build", "Dist"] do
+    Dir["Release/*"].each do |file|
+      next if File.basename(file) == "obj"
+      if File.directory?(file)
+        cp_r file, "Dist/#{File.basename file}"
+      elsif File.file?(file)
+        cp file, "Dist/#{File.basename file}"
+      end
+    end
+    
+    Dir["Dist/**/*.{o,exe,dll,so}"].each do |binary|
       sh "strip --strip-unneeded #{binary}"
     end
   end
-  
-  desc "Build the Release configuration"
-  task :build => ["compile", "link", "Release/app.xrc", "Release/msvcrt-ruby210.dll", "Release/lib/ruby", "strip"]
 end
