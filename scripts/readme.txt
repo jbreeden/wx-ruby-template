@@ -1,0 +1,1 @@
+This directory is a place to hold your application's ruby scripts.
