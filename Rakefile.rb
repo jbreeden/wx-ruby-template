@@ -1,23 +1,27 @@
 # Global Build tool configuration
-# ===============================
+# ======================
 
 $CPP = ENV['CPP'] || "g++"
 $CC = ENV['CC'] || "gcc"
+$RUBY = ENV['RUBY'] || "ruby20_mingw"
+$RUBYDLL = ENV['RUBYDLL'] || "x64-msvcrt-ruby200.dll"
+$RUBYDO = ENV['RUBYDO'] || "C:/projects/rubydo"
+$WXWIDGETS = ENV['WXWIDGETS'] || "C:/projects/lib/wxWidgets-3.0.1"
 
 # Global Compilation Options
-# ==========================
+# ====================
 
-$COMPILE_FLAGS = %w[
--std=c++11
+$COMPILE_FLAGS = [
+  "-std=c++11"
 ]
 
-$INCLUDE_PATHS = %w[
-include
-C:/projects/lib/wxWidgets-3.0.1/include
-C:/projects/lib/wxWidgets-3.0.1/lib/gcc_lib/mswu
-C:/Ruby-2.1.2-custom/include/ruby-2.1.0
-C:/Ruby-2.1.2-custom/include/ruby-2.1.0/i386-mingw32
-C:/projects/rubydo/include
+$INCLUDE_PATHS = [
+  "include",
+  "#{$WXWIDGETS}/include",
+  "#{$WXWIDGETS}/lib/gcc_lib/mswu",
+  "#{$RUBY}/include/ruby-2.0.0",
+  "#{$RUBY}/include/ruby-2.0.0/x64-mingw32",
+  "#{$RUBYDO}/include"
 ]
 
 def compile_options
@@ -27,37 +31,37 @@ def compile_options
 end
 
 # Global Linking Options
-# ======================
+# ================
 
 $ARTIFACT = "app.exe"
 
 $LINK_FLAGS = []
 
-$LIBRARY_PATHS = %w[
-C:/projects/lib/wxWidgets-3.0.1/lib/gcc_lib
-C:/Ruby-2.1.2-custom/lib
-C:/projects/rubydo/Debug
+$LIBRARY_PATHS = [
+  "#{$WXWIDGETS}/lib/gcc_lib",
+  "#{$RUBY}/lib",
+  "#{$RUBYDO}/Debug"
 ]
 
-$LIBRARIES = %w[
-wxmsw30u
-wxscintilla
-wxexpat
-wxjpeg
-wxpng
-wxregexu
-wxtiff
-wxzlib
-rubydo
-msvcrt-ruby210.dll
-Comctl32
-Ole32
-Gdi32
-Shell32
-uuid
-OleAut32
-Comdlg32
-Winspool
+$LIBRARIES = [
+  "wxmsw30u",
+  "wxscintilla",
+  "wxexpat",
+  "wxjpeg",
+  "wxpng",
+  "wxregexu",
+  "wxtiff",
+  "wxzlib",
+  "rubydo",
+  $RUBYDLL,
+  "Comctl32",
+  "Ole32",
+  "Gdi32",
+  "Shell32",
+  "uuid",
+  "OleAut32",
+  "Comdlg32",
+  "Winspool"
 ]
 
 def link_options
@@ -71,12 +75,12 @@ def link_libraries
 end
 
 # Global File Lists
-# =================
+# ===========
   
 $SOURCE_FILES = FileList["src/**/*.{c,cpp}"]
 
 # Debug Configuration Tasks
-# =========================
+# ===================
 
 namespace :debug do
   # Customize compile options for this configuration
@@ -91,6 +95,8 @@ namespace :debug do
     $LIBRARY_PATHS += []
     $LIBRARIES += []
   end
+  
+  directory "Debug"
   
   # Derive the object files & output directories from the source files
   obj_files = $SOURCE_FILES.pathmap("Debug/obj/%X.o")
@@ -111,13 +117,25 @@ namespace :debug do
     cp "app.xrc", "Debug/app.xrc"
   end
   
-  file "Debug/msvcrt-ruby210.dll" => "C:/Ruby-2.1.2-custom/lib/msvcrt-ruby210.dll" do
-    cp "C:/Ruby-2.1.2-custom/lib/msvcrt-ruby210.dll", "Debug/msvcrt-ruby210.dll"
+  file "Debug/#{$RUBYDLL}" => "#{$RUBY}/bin/#{$RUBYDLL}" do
+    cp "#{$RUBY}/bin/#{$RUBYDLL}", "Debug/#{$RUBYDLL}"
   end
   
   directory "Debug/lib/ruby" do
     mkdir_p "Debug/lib"
-    cp_r "C:/Ruby-2.1.2-custom/lib/ruby", "Debug/lib"
+    cp_r "#{$RUBY}/lib/ruby", "Debug/lib"
+  end
+  
+  task "scripts" do
+    cp_r "scripts", "Debug"
+  end
+  
+  desc "Copy over support files"
+  task :support_files => ["Debug", "Debug/app.xrc", "Debug/#{$RUBYDLL}", "Debug/lib/ruby", "scripts"]
+  
+  desc "Compile the resources file"
+  task :resources do
+	sh "windres \"-I#{$WXWIDGETS}/include\" resources.rc Debug/resources.o"
   end
   
   desc "Compile all sources"
@@ -125,15 +143,15 @@ namespace :debug do
   
   desc "Link the Debug artifact"
   task :link => %w[link_options compile] do
-    sh "#{$CPP} #{link_options} #{obj_files.join(' ')} #{link_libraries} -o Debug/#{$ARTIFACT}"
+    sh "#{$CPP} #{link_options} Debug/resources.o #{obj_files.join(' ')} #{link_libraries} -o Debug/#{$ARTIFACT}"
   end
   
   desc "Build the Debug configuration"
-  task :build => ["compile", "link", "Debug/app.xrc", "Debug/msvcrt-ruby210.dll", "Debug/lib/ruby"]
+  task :build => ["Debug", "resources", "compile", "link", "support_files"]
 end
 
 # Release Configuration Tasks
-# ===========================
+# =====================
 
 namespace :release do
   # Customize compile options for this configuration
@@ -168,13 +186,13 @@ namespace :release do
     cp "app.xrc", "Release/app.xrc"
   end
   
-  file "Release/msvcrt-ruby210.dll" => "C:/Ruby-2.1.2-custom/lib/msvcrt-ruby210.dll" do
-    cp "C:/Ruby-2.1.2-custom/lib/msvcrt-ruby210.dll", "Release/msvcrt-ruby210.dll"
+  file "Release/#{$RUBYDLL}" => "#{$RUBY}/bin/#{$RUBYDLL}" do
+    cp "#{$RUBY}/bin/#{$RUBYDLL}", "Release/#{$RUBYDLL}"
   end
   
   directory "Release/lib/ruby" do
     mkdir_p "Release/lib"
-    cp_r "C:/Ruby-2.1.2-custom/lib/ruby", "Release/lib"
+    cp_r "#{$RUBY}/lib/ruby", "Release/lib"
   end
   
   desc "Compile all sources"
@@ -186,11 +204,11 @@ namespace :release do
   end
   
   desc "Build the Release configuration"
-  task :build => ["compile", "link", "Release/app.xrc", "Release/msvcrt-ruby210.dll", "Release/lib/ruby"]
+  task :build => ["compile", "link", "Release/app.xrc", "Release/#{$RUBYDLL}", "Release/lib/ruby"]
 end
 
 # Dist Configuration Tasks
-# ========================
+# ==================
 
 namespace :dist do
  
@@ -212,7 +230,7 @@ namespace :dist do
 end
 
 # Clean task
-# ==========
+# ========
 
 task :clean do
   rm_rf "Debug" if File.exists? "Debug"
