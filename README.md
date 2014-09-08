@@ -14,7 +14,6 @@ In The Box
 ----------
 
 - Rake file for building with support for separate debug, release, and distribution configurations
-- An eclipse project file configured to build with the supplied rake file
 - A bare-bones wxFormBuilder project w/ pre-generated app.xrc (containing a single blank wxFrame)
 - A bare-bones MainFrame class
 - A bare-bones App class that initializes ruby, releases the GVL & launches the main frame
