@@ -1,8 +1,8 @@
 require "./rakelib/rake_gcc"
 include RakeGcc
 
-# Global Build tool configuration
-# ======================
+# Settings
+# ========
 
 $CPP = ENV['CPP'] || "g++"
 $CC = ENV['CC'] || "gcc"
@@ -10,6 +10,9 @@ $RUBY = ENV['RUBY'] || "ruby20_mingw"
 $RUBYDLL = ENV['RUBYDLL'] || "x64-msvcrt-ruby200.dll"
 $RUBYDO = ENV['RUBYDO'] || "C:/projects/rubydo"
 $WXWIDGETS = ENV['WXWIDGETS'] || "C:/projects/lib/wxWidgets-3.0.1"
+
+# debug target
+# ============
 
 build_target :debug do
   compiler $CPP
@@ -74,6 +77,7 @@ end
 # release target
 # ==============
 
+# release simply inherits from debug, redefining settings as needed
 build_target :release, :debug do
   compile do
     undefine :DEBUG
@@ -84,6 +88,8 @@ end
 # dist target
 # ===========
 
+# The dist target builds the release target, copies it into the dist
+# folder (ignoring object files) and runs strip to reduce the exe size
 namespace :dist do
   directory "dist"
   task :build => ["release:build", "dist"] do
