@@ -26,9 +26,9 @@ public:
 };
 
 int main(int argc, char** argv) {
-  ruby::init(argc, argv);
-
-  ruby::without_gvl(DO [&](){
+  rubydo::init(argc, argv);
+  
+  rubydo::without_gvl(DO [&](){
     wxApp::SetInstance(new App);
     wxEntryStart(argc, argv);
     wxTheApp->OnInit();
