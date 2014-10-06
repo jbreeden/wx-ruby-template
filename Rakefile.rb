@@ -92,17 +92,22 @@ end
 # folder (ignoring object files) and runs strip to reduce the exe size
 namespace :dist do
   directory "dist"
-  task :build => ["release:build", "dist"] do
-    Dir["Release/*"].each do |file|
+  
+  task :clean do
+    rm_rf "dist"
+  end
+  
+  task :build => ["clean", "release:build", "dist"] do
+    Dir["release/*"].each do |file|
       next if File.basename(file) == "obj"
       if File.directory?(file)
-        cp_r file, "Dist/#{File.basename file}"
+        cp_r file, "dist/#{File.basename file}"
       elsif File.file?(file)
-        cp file, "Dist/#{File.basename file}"
+        cp file, "dist/#{File.basename file}"
       end
     end
     
-    Dir["Dist/**/*.{o,exe,dll,so}"].each do |binary|
+    Dir["dist/**/*.{o,exe,dll,so}"].each do |binary|
       sh "strip --strip-unneeded #{binary}"
     end
   end
